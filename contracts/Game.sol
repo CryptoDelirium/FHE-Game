@@ -1,64 +1,107 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
-// import "hardhat/console.sol";
+import "@fhevm/solidity/lib/FHE.sol";
+import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 
-contract Game {
+import "hardhat/console.sol";
+
+contract Game is SepoliaConfig{
     address[2] public players;
-    // bool private single-player;
+    bool private single_player; //0 - multi-player; 1 - single player
     bool public hasPlayed1;
     bool public hasPlayed2;
-    uint8[8] public moves; //0 - rock; 1 - paper; 2 - scissors;
+    euint8[2] public encrypted_moves; //0 - rock; 1 - paper; 2 - scissors;
+    uint8[2] private cleartext_moves;
+    bool private isDecryptionPending;
+    bool private decrypted;
     uint8 public result; //0 - draw; 1 - player 1 win, 2 - player 2 wins
+
+    function selectMode(bool input) external {
+        single_player = input;
+    }
 
     //////////////////////////////////// 
     //// Allow players to join game ////
     //////////////////////////////////// 
+    ///@notice A game lobby allowing 2 players to join for a game of Rock-Paper-Scissors
     function joinGame() public {
-        require(players[0]==address(0) || players[1]==address(0), "Lobby Full");
-        if (players[0]!= address(0)){
-            players[1] = msg.sender;
-        }
-        else{
+        if(single_player){
+            require(players[0]==address(0), "Lobby Full");
             players[0] = msg.sender;
-        }
-        // future, if two addresses are equal then against computer
-    }
-
-    function playGame(uint8 input) public {
-        require(msg.sender==players[0] || msg.sender==players[1], "Invalid Player");
-        if(msg.sender==players[0]){
-            hasPlayed1 = true;
-            // No checking here;
-            moves[0] = input;
+            players[1] = msg.sender;
         } else {
-            hasPlayed2 = true;
-            // No checking here;
-            moves[1] = input;
+            require( players[0]==address(0) || players[1]==address(0), "Lobby Full");
+            if (players[0]!= address(0)){
+            players[1] = msg.sender;
+            }
+            else{
+                players[0] = msg.sender;
+            }
         }
     }
 
+    ////////////////////////////////////////////// 
+    //// Players submit their encrypted moves ////
+    ////////////////////////////////////////////// 
+    ///@notice Players submit their encrypted moves asynchronously along with its proof
+    function playGame(externalEuint8 input, bytes calldata proof) public {
+        if(single_player){
+            require(msg.sender==players[0], "Invalid Player");
+            euint8 singleEncryptedInput = FHE.fromExternal(input, proof);
+            hasPlayed1 = true;
+            hasPlayed2 = true;
+            
+            encrypted_moves[0] = singleEncryptedInput;
+            encrypted_moves[1] = FHE.randEuint8(4);
+            FHE.allowThis(encrypted_moves[0]);
+            FHE.allowThis(encrypted_moves[1]);
+        } else {
+            require(msg.sender==players[0] || msg.sender==players[1], "Invalid Player");
+            euint8 encryptedInput = FHE.fromExternal(input, proof);
+            
+            if(msg.sender==players[0]){
+                hasPlayed1 = true;
+                // No checking here;
+                encrypted_moves[0] = encryptedInput;
+                FHE.allowThis(encrypted_moves[0]);
+                FHE.allow(encrypted_moves[0], address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266));
+                decrypted = false;
+            } else {
+                hasPlayed2 = true;
+                // No checking here;
+                encrypted_moves[1] = encryptedInput;
+                FHE.allowThis(encrypted_moves[1]);
+                FHE.allow(encrypted_moves[1], address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266));
+                decrypted = false;
+            }
+        }
+    }
+
+    ///@dev Given the limitation that the random number generation requires a power of 2, a generated 3 would result in a draw!!! 
     function endGame() public returns(uint8){
         require(hasPlayed1 && hasPlayed2, "Waiting on player");
-        if (moves[0]==moves[1]){
+        require(decrypted, "Not yet decrypted");
+        console.log("The moves are: %i and %i.\n 0 - Rock, 1- Paper, 2 - Scissors", cleartext_moves[0], cleartext_moves[1]);
+        if (cleartext_moves[0] == cleartext_moves[1]){
             result = 0;
         } else{
-            if(moves[0]==0 && moves[1]==1){ //player1 rock - player2 paper
+            if(cleartext_moves[0] == 0 && cleartext_moves[1] == 1){ //player1 rock - player2 paper
                 result = 2;
             }
-            if(moves[0]==0 && moves[1]==2){ //player1 rock - player2 scissors
+            if(cleartext_moves[0] == 0 && cleartext_moves[1]==2){ //player1 rock - player2 scissors
                 result = 1;
             }
-            if(moves[0]==1 && moves[1]==0){ //player1 paper - player2 rock
+            if(cleartext_moves[0]==1 && cleartext_moves[1]==0){ //player1 paper - player2 rock
                 result = 1;
             }
-            if(moves[0]==1 && moves[1]==2){ //player1 paper - player2 scissors
+            if(cleartext_moves[0]==1 && cleartext_moves[1]==2){ //player1 paper - player2 scissors
                 result = 2;
             }
-            if(moves[0]==2 && moves[1]==0){ //player1 scissors - player2 rock
+            if(cleartext_moves[0]==2 && cleartext_moves[1]==0){ //player1 scissors - player2 rock
                 result = 1;
             }
-            if(moves[0]==0 && moves[1]==1){ //player1 scissors - player2 paper
+            if(cleartext_moves[0]==0 && cleartext_moves[1]==1){ //player1 scissors - player2 paper
                 result = 2;
             }
         }
@@ -66,4 +109,20 @@ contract Game {
         return result;
     }
 
+    ///////////////// Helper Functions /////////////////
+function requestDecryptPlayerMoves() external {
+    bytes32[] memory cypherTexts = new bytes32[](2);
+    cypherTexts[0] = FHE.toBytes32(encrypted_moves[0]);
+    cypherTexts[1] = FHE.toBytes32(encrypted_moves[1]);
+
+    decrypted = true;
+
+    FHE.requestDecryption(cypherTexts, this.callbackDecryptMultipleValues.selector);
+}
+
+function callbackDecryptMultipleValues(uint256 requestID, uint8 decryptPlayer1, uint8 decryptPlayer2, bytes[] memory signatures) external {
+    FHE.checkSignatures(requestID, signatures);
+    cleartext_moves[0] = decryptPlayer1;
+    cleartext_moves[1] = decryptPlayer2;
+  }
 }
