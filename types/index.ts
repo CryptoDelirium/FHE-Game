@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as fhevm from "./@fhevm";
 export type { fhevm };
+import type * as openzeppelin from "./@openzeppelin";
+export type { openzeppelin };
 import type * as contracts from "./contracts";
 export type { contracts };
 export * as factories from "./factories";
@@ -22,5 +24,7 @@ export type { IFHEVMExecutor } from "./@fhevm/solidity/lib/Impl.sol/IFHEVMExecut
 export { IFHEVMExecutor__factory } from "./factories/@fhevm/solidity/lib/Impl.sol/IFHEVMExecutor__factory";
 export type { IInputVerifier } from "./@fhevm/solidity/lib/Impl.sol/IInputVerifier";
 export { IInputVerifier__factory } from "./factories/@fhevm/solidity/lib/Impl.sol/IInputVerifier__factory";
+export type { Ownable } from "./@openzeppelin/contracts/access/Ownable";
+export { Ownable__factory } from "./factories/@openzeppelin/contracts/access/Ownable__factory";
 export type { Game } from "./contracts/Game";
 export { Game__factory } from "./factories/contracts/Game__factory";

@@ -3,7 +3,6 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumberish,
   BytesLike,
   FunctionFragment,
   Result,
@@ -21,79 +20,28 @@ import type {
   TypedLogDescription,
   TypedListener,
   TypedContractMethod,
-} from "../common";
+} from "../../../common";
 
-export interface GameInterface extends Interface {
+export interface OwnableInterface extends Interface {
   getFunction(
-    nameOrSignature:
-      | "encrypted_moves"
-      | "hasPlayed1"
-      | "hasPlayed2"
-      | "joinGame"
-      | "owner"
-      | "playGame"
-      | "players"
-      | "renounceOwnership"
-      | "result"
-      | "selectSinglePlayer"
-      | "transferOwnership"
+    nameOrSignature: "owner" | "renounceOwnership" | "transferOwnership"
   ): FunctionFragment;
 
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 
-  encodeFunctionData(
-    functionFragment: "encrypted_moves",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "hasPlayed1",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "hasPlayed2",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "joinGame", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "playGame",
-    values: [BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "players",
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "result", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "selectSinglePlayer",
-    values: [boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "encrypted_moves",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "hasPlayed1", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hasPlayed2", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "joinGame", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "playGame", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "players", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "result", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "selectSinglePlayer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -115,11 +63,11 @@ export namespace OwnershipTransferredEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface Game extends BaseContract {
-  connect(runner?: ContractRunner | null): Game;
+export interface Ownable extends BaseContract {
+  connect(runner?: ContractRunner | null): Ownable;
   waitForDeployment(): Promise<this>;
 
-  interface: GameInterface;
+  interface: OwnableInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -158,33 +106,9 @@ export interface Game extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  encrypted_moves: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
-
-  hasPlayed1: TypedContractMethod<[], [boolean], "view">;
-
-  hasPlayed2: TypedContractMethod<[], [boolean], "view">;
-
-  joinGame: TypedContractMethod<[], [void], "nonpayable">;
-
   owner: TypedContractMethod<[], [string], "view">;
 
-  playGame: TypedContractMethod<
-    [input: BytesLike, proof: BytesLike],
-    [void],
-    "nonpayable"
-  >;
-
-  players: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
-
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
-
-  result: TypedContractMethod<[], [bigint], "view">;
-
-  selectSinglePlayer: TypedContractMethod<
-    [input: boolean],
-    [void],
-    "nonpayable"
-  >;
 
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
@@ -197,39 +121,11 @@ export interface Game extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "encrypted_moves"
-  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
-  getFunction(
-    nameOrSignature: "hasPlayed1"
-  ): TypedContractMethod<[], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "hasPlayed2"
-  ): TypedContractMethod<[], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "joinGame"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "playGame"
-  ): TypedContractMethod<
-    [input: BytesLike, proof: BytesLike],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "players"
-  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
-  getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "result"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "selectSinglePlayer"
-  ): TypedContractMethod<[input: boolean], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;

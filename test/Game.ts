@@ -1,6 +1,7 @@
 import { Game } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { HardhatFhevmRuntimeEnvironment } from "@fhevm/hardhat-plugin";
+import { FhevmType } from "@fhevm/hardhat-plugin";
+import { fhevm } from "hardhat";
 import { expect } from "chai";
 import { ethers} from "hardhat";
 import hre from "hardhat";
@@ -23,10 +24,6 @@ import hre from "hardhat";
     let player2: HardhatEthersSigner;
     let Deployed_Game: Game;
     let Game_Address: string;
-
-    // We use the FHEVM Hardhat plugin to simulate the asynchronous on-chain
-    // decryption
-    const fhevm: HardhatFhevmRuntimeEnvironment = hre.fhevm;
 
     beforeEach(async () => {
     // Deploy a new instance of the contract before each test
@@ -78,28 +75,7 @@ import hre from "hardhat";
       expect(Deployed_Game.hasPlayed2);
     });
 
-    it("should fail without calling decryption", async function () {
-      // Both players join game
-      const tx1 = await Deployed_Game.connect(player1).joinGame();
-      await tx1.wait();
-      const tx2 = await Deployed_Game.connect(player2).joinGame();
-      await tx2.wait();
-
-      // Generate encrypted inputs
-      const encryptedInput0 = await fhevm.createEncryptedInput(Game_Address, player1.address).add8(0).encrypt();
-      const encryptedInput1 = await fhevm.createEncryptedInput(Game_Address, player2.address).add8(1).encrypt();
-      
-      //Player 1 chooses Rock
-      const tx3 = await Deployed_Game.connect(player1).playGame(encryptedInput0.handles[0], encryptedInput0.inputProof);
-      await tx3.wait();
-      // Player 2 chooses Paper
-      const tx4 = await Deployed_Game.connect(player2).playGame(encryptedInput1.handles[0], encryptedInput1.inputProof);
-      await tx4.wait();
-
-      expect(Deployed_Game.endGame()).to.be.revertedWith("Not yet decrypted");
-    });
-
-    it("identify winner", async function () {
+    it("frontend decryption and winner logic", async function () {
     // Both players join game
     const tx1 = await Deployed_Game.connect(player1).joinGame();
     await tx1.wait();
@@ -119,19 +95,47 @@ import hre from "hardhat";
     const tx4 = await Deployed_Game.connect(player2).playGame(encryptedInput1.handles[0], encryptedInput1.inputProof);
     await tx4.wait();
 
-    // Use the built-in `awaitDecryptionOracle` helper to wait for the FHEVM decryption oracle
-    // to complete all pending Solidity decryption requests.
-    const tx_decrypt = await Deployed_Game.connect(owner).requestDecryptPlayerMoves();
-    await tx_decrypt.wait();
-    await fhevm.awaitDecryptionOracle();
+    // Frontend requests the encrypted variables and requests decryption
+    const player1_einput = await Deployed_Game.connect(player1).encrypted_moves(0);
+    const player2_einput = await Deployed_Game.connect(player2).encrypted_moves(1);
+
+    const player1_cleartext = await fhevm.userDecryptEuint(
+      FhevmType.euint8, 
+      player1_einput,
+      Game_Address,
+      owner,
+    );
+
+    const player2_cleartext = await fhevm.userDecryptEuint(
+      FhevmType.euint8,
+      player2_einput,
+      Game_Address,
+      owner,
+    );
 
     // Determine winner
-    const tx_end = await Deployed_Game.endGame();
-
-    console.log(tx_end.from);
-    await tx_end.wait();
-
-    expect(await Deployed_Game.result()).to.eq(2);
+    if (player1_cleartext == player2_cleartext){
+            console.log("This is a draw");
+    } else{
+        if(player1_cleartext == BigInt(0) && player2_cleartext == BigInt(1)){
+            console.log("Player 1 plays Rock, Player 2 plays Paper.\nPlayer 2 wins");
+        }
+        if(player1_cleartext == BigInt(0) && player2_cleartext == BigInt(2)){
+            console.log("Player 1 plays Rock, Player 2 plays Scissors.\nPlayer 1 wins");
+        }
+        if(player1_cleartext == BigInt(1) && player2_cleartext == BigInt(0)){
+            console.log("Player 1 plays Paper, Player 2 plays Rock.\nPlayer 1 wins");
+        }
+        if(player1_cleartext == BigInt(1) && player2_cleartext == BigInt(2)){ //player1 paper - player2 scissors
+            console.log("Player 1 plays Paper, Player 2 plays Scissors.\nPlayer 2 wins");
+        }
+        if(player1_cleartext == BigInt(2) && player2_cleartext == BigInt(0)){ //player1 scissors - player2 rock
+            console.log("Player 1 plays Scissors, Player 2 plays Rock.\nPlayer 2 wins");
+        }
+        if(player1_cleartext == BigInt(2) && player2_cleartext == BigInt(1)){ //player1 scissors - player2 paper
+            console.log("Player 1 plays Scissors, Player 2 plays Paper.\nPlayer 1 wins");
+        }
+    }
   });
 
   describe("Single-player", function () {
@@ -140,10 +144,6 @@ import hre from "hardhat";
     let player2: HardhatEthersSigner;
     let Deployed_Game: Game;
     let Game_Address: string;
-
-    // We use the FHEVM Hardhat plugin to simulate the asynchronous on-chain
-    // decryption
-    const fhevm: HardhatFhevmRuntimeEnvironment = hre.fhevm;
 
     beforeEach(async () => {
     // Deploy a new instance of the contract before each test
@@ -157,7 +157,7 @@ import hre from "hardhat";
     });
 
     it("player join single game", async function () {
-      const tx_single = await Deployed_Game.selectMode(true);
+      const tx_single = await Deployed_Game.selectSinglePlayer(true);
       await tx_single.wait();
       const tx_join = await Deployed_Game.connect(player1).joinGame();
       await tx_join.wait();
@@ -168,7 +168,7 @@ import hre from "hardhat";
 
     it("player inputs recorded", async function () {
       // Select single player
-      const tx_single = await Deployed_Game.selectMode(true);
+      const tx_single = await Deployed_Game.selectSinglePlayer(true);
       await tx_single.wait();
       const tx1 = await Deployed_Game.connect(player1).joinGame();
       await tx1.wait();
@@ -186,8 +186,8 @@ import hre from "hardhat";
 
     it("identify winner", async function () {
       // Select single player
-      const tx_single = await Deployed_Game.selectMode(true);
-      await tx_single.wait();
+      await Deployed_Game.selectSinglePlayer(true);
+
       const tx1 = await Deployed_Game.connect(player1).joinGame();
       await tx1.wait();
 
@@ -198,21 +198,51 @@ import hre from "hardhat";
       //Player 1 chooses Rock
       const tx3 = await Deployed_Game.connect(player1).playGame(encryptedInput0.handles[0], encryptedInput0.inputProof);
       await tx3.wait();
+// Frontend requests the encrypted variables and requests decryption
+    const player1_einput = await Deployed_Game.connect(player1).encrypted_moves(0);
+    const player2_einput = await Deployed_Game.connect(player2).encrypted_moves(1);
 
-      // Use the built-in `awaitDecryptionOracle` helper to wait for the FHEVM decryption oracle
-      // to complete all pending Solidity decryption requests.
-      const tx_decrypt = await Deployed_Game.connect(owner).requestDecryptPlayerMoves();
-      await tx_decrypt.wait();
-      await fhevm.awaitDecryptionOracle();
+    const player1_cleartext = await fhevm.userDecryptEuint(
+      FhevmType.euint8,
+      player1_einput,
+      Game_Address,
+      owner,
+    );
 
-      // Determine winner
-      const tx_end = await Deployed_Game.endGame();
-      await tx_end.wait();
+    const computer_cleartext = await fhevm.userDecryptEuint(
+      FhevmType.euint8,
+      player2_einput,
+      Game_Address,
+      owner,
+    );
 
-      const result = await Deployed_Game.result();
-
-      console.log("Expected winner is player %i. Player 0 is draw", Number(result));
-      //expect(await Deployed_Game.result()).to.eq(2);
+    // Determine winner
+    // Handle the case of 3 due to the power-of-two constraint
+    if(computer_cleartext==BigInt(3)){
+      console.log("Game unable to complete due to cryptographic constraint on the random number generation. Please play again.");
+    }
+    if (player1_cleartext == computer_cleartext){
+            console.log("This is a draw");
+    } else{
+        if(player1_cleartext == BigInt(0) && computer_cleartext == BigInt(1)){
+            console.log("Player 1 plays Rock, Player 2 plays Paper.\nPlayer 2 wins");
+        }
+        if(player1_cleartext == BigInt(0) && computer_cleartext == BigInt(2)){
+            console.log("Player 1 plays Rock, Player 2 plays Scissors.\nPlayer 1 wins");
+        }
+        if(player1_cleartext == BigInt(1) && computer_cleartext == BigInt(0)){
+            console.log("Player 1 plays Paper, Player 2 plays Rock.\nPlayer 1 wins");
+        }
+        if(player1_cleartext == BigInt(1) && computer_cleartext == BigInt(2)){ //player1 paper - player2 scissors
+            console.log("Player 1 plays Paper, Player 2 plays Scissors.\nPlayer 2 wins");
+        }
+        if(player1_cleartext == BigInt(2) && computer_cleartext == BigInt(0)){ //player1 scissors - player2 rock
+            console.log("Player 1 plays Scissors, Player 2 plays Rock.\nPlayer 2 wins");
+        }
+        if(player1_cleartext == BigInt(2) && computer_cleartext == BigInt(1)){ //player1 scissors - player2 paper
+            console.log("Player 1 plays Scissors, Player 2 plays Paper.\nPlayer 1 wins");
+        }
+    }
     });
   });
 });

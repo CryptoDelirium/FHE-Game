@@ -1,29 +1,34 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
-import "@fhevm/solidity/lib/FHE.sol";
+import { FHE, euint8, externalEuint8 } from "@fhevm/solidity/lib/FHE.sol";
 import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import "hardhat/console.sol";
 
-contract Game is SepoliaConfig{
+contract Game is SepoliaConfig, Ownable{
     address[2] public players;
     bool private single_player; //0 - multi-player; 1 - single player
     bool public hasPlayed1;
     bool public hasPlayed2;
     euint8[2] public encrypted_moves; //0 - rock; 1 - paper; 2 - scissors;
-    uint8[2] private cleartext_moves;
-    bool private isDecryptionPending;
-    bool private decrypted;
     uint8 public result; //0 - draw; 1 - player 1 win, 2 - player 2 wins
 
-    function selectMode(bool input) external {
+    constructor() Ownable(msg.sender){}
+
+    //////////////////////////////// 
+    //// Set Single Player Mode ////
+    ////////////////////////////////
+
+    function selectSinglePlayer(bool input) public {
         single_player = input;
     }
 
     //////////////////////////////////// 
     //// Allow players to join game ////
     //////////////////////////////////// 
+
     ///@notice A game lobby allowing 2 players to join for a game of Rock-Paper-Scissors
     function joinGame() public {
         if(single_player){
@@ -44,7 +49,9 @@ contract Game is SepoliaConfig{
     ////////////////////////////////////////////// 
     //// Players submit their encrypted moves ////
     ////////////////////////////////////////////// 
+    
     ///@notice Players submit their encrypted moves asynchronously along with its proof
+    ///@dev Only the owner, administrator of the game, may decrypt. Not the players.
     function playGame(externalEuint8 input, bytes calldata proof) public {
         if(single_player){
             require(msg.sender==players[0], "Invalid Player");
@@ -55,7 +62,9 @@ contract Game is SepoliaConfig{
             encrypted_moves[0] = singleEncryptedInput;
             encrypted_moves[1] = FHE.randEuint8(4);
             FHE.allowThis(encrypted_moves[0]);
+            FHE.allow(encrypted_moves[0], owner());
             FHE.allowThis(encrypted_moves[1]);
+            FHE.allow(encrypted_moves[1], owner());
         } else {
             require(msg.sender==players[0] || msg.sender==players[1], "Invalid Player");
             euint8 encryptedInput = FHE.fromExternal(input, proof);
@@ -65,19 +74,22 @@ contract Game is SepoliaConfig{
                 // No checking here;
                 encrypted_moves[0] = encryptedInput;
                 FHE.allowThis(encrypted_moves[0]);
-                FHE.allow(encrypted_moves[0], address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266));
-                decrypted = false;
+                FHE.allow(encrypted_moves[0], owner());
             } else {
                 hasPlayed2 = true;
                 // No checking here;
                 encrypted_moves[1] = encryptedInput;
                 FHE.allowThis(encrypted_moves[1]);
-                FHE.allow(encrypted_moves[1], address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266));
-                decrypted = false;
+                FHE.allow(encrypted_moves[1], owner());
             }
         }
     }
+    ////////////////////////////////////////////
+    //// Do not use!! Cleartext decryption  ////
+    //// in contract reveals player moves   ////
+    ////////////////////////////////////////////
 
+    /*
     ///@dev Given the limitation that the random number generation requires a power of 2, a generated 3 would result in a draw!!! 
     function endGame() public returns(uint8){
         require(hasPlayed1 && hasPlayed2, "Waiting on player");
@@ -124,5 +136,5 @@ function callbackDecryptMultipleValues(uint256 requestID, uint8 decryptPlayer1, 
     FHE.checkSignatures(requestID, signatures);
     cleartext_moves[0] = decryptPlayer1;
     cleartext_moves[1] = decryptPlayer2;
-  }
+  } */
 }
