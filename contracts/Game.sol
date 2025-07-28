@@ -21,7 +21,9 @@ contract Game is SepoliaConfig, Ownable{
     //// Set Single Player Mode ////
     ////////////////////////////////
 
-    function selectSinglePlayer(bool input) public {
+    /// @notice Allows single player mode
+    /// @param input Flag for single-player mode 
+    function selectSinglePlayer(bool input) external {
         single_player = input;
     }
 
@@ -29,7 +31,7 @@ contract Game is SepoliaConfig, Ownable{
     //// Allow players to join game ////
     //////////////////////////////////// 
 
-    ///@notice A game lobby allowing 2 players to join for a game of Rock-Paper-Scissors
+    /// @notice The game lobby for single or multi-player Rock-Paper-Scissors
     function joinGame() public {
         if(single_player){
             require(players[0]==address(0), "Lobby Full");
@@ -49,9 +51,12 @@ contract Game is SepoliaConfig, Ownable{
     ////////////////////////////////////////////// 
     //// Players submit their encrypted moves ////
     ////////////////////////////////////////////// 
-    
-    ///@notice Players submit their encrypted moves asynchronously along with its proof
-    ///@dev Only the owner, administrator of the game, may decrypt. Not the players.
+
+    /// @notice Players submit their encrypted moves asynchronously along with its proof
+    /// @param input An external encrypted input of the player provided by the frontend
+    /// @param proof Corresponding proof of encryption
+    /// @dev there is no input checking on the smart contract. Must check validity of use input on the frontend!
+    /// @dev Only the owner, administrator of the game, may decrypt. Not the players.
     function playGame(externalEuint8 input, bytes calldata proof) public {
         if(single_player){
             require(msg.sender==players[0], "Invalid Player");

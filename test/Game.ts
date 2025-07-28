@@ -157,8 +157,7 @@ import hre from "hardhat";
     });
 
     it("player join single game", async function () {
-      const tx_single = await Deployed_Game.selectSinglePlayer(true);
-      await tx_single.wait();
+      await Deployed_Game.selectSinglePlayer(true);
       const tx_join = await Deployed_Game.connect(player1).joinGame();
       await tx_join.wait();
 
@@ -168,8 +167,7 @@ import hre from "hardhat";
 
     it("player inputs recorded", async function () {
       // Select single player
-      const tx_single = await Deployed_Game.selectSinglePlayer(true);
-      await tx_single.wait();
+      await Deployed_Game.selectSinglePlayer(true);
       const tx1 = await Deployed_Game.connect(player1).joinGame();
       await tx1.wait();
 

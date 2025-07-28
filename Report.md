@@ -37,5 +37,29 @@ As an experience driven learner, I first looked at the provided Solidity tutoria
     ✅ In the end, I opted for option 2 as there were scalability concerns with frequent oracle calls and had to re-write test logic very close to deadline.
 
 ### Documentation
+✅ Reflect on the target audience and what kind of content and experience they would like to have
+    - New developers need a detailed guide. It is also important to develop a feel for how to add encryption.
+    - Frontend only or experienced developers only require an API.
+        ❌ There are very few Solidity documentation generators. Spent some hours evaluating different options but only the OpenZeppelin `solidity-docgen` able to generate a md file which works with Docusaurus.
+    - Researchers would like blog articles and scientific content which goes deep into the subject
+✅ Consider different learning styles
+    - Video content or visual learners
+    - Sandbox for experience learners
+❌❌❌ Chose the documentation software platform
+    First started with Gitbook as the standard. Easy to use with UI editor. However, Gitbook crashed and the platform did not allow editing close to the submission deadline so changed to Docusaurus for its local deployment, md style editing.
+
 ### Future Considerations
-I commented out, but did not delete, the original contract logic, because I would like to discuss with future colleagues the consequences of both points of decryption.
+There is always room for improvement in the code and documentation. Some possible TODOs:
+
+- It is possible to compare the encrypted value on the smart contract and return an ebool which can be decrypted onchain without revealing the player choice. However, this would require a lot of calls to the decryption oracle given the established workflow of comparing the player input to a 0,1,2, or 3. I left an incorrect attempt in the code as I would like to discuss with colleagues the merits of both onchain and frontend decryption.
+
+- Develop an additional Sepolia test suite for onchain simulation instead of only local hardhat testing.
+
+- Would have loved to implement a playground so new developers can directly interact with the smart contract and see the outputs without needing to install or run code.
+
+- Setup some developer tags in the github repo to entice open source contributions. For example, `Good-first-issue` for new entrants or a bounty program.
+
+For my own knowledge and interest:
+
+- Dig deeper into the KMS and ACL libraries.
+- Make available the foundry and remix version of the Counter tutorial.

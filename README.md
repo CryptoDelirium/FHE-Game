@@ -12,9 +12,26 @@
 
 ### Environment Setup
 
-### Installation
+### Project Quickstart
 
-### Testing and Deployment
+Clone this repository
+```bash
+git clone https://github.com/CryptoDelirium/FHE-Game.git
+```
+
+Compile and run the test cases in Hardhat
+```bash
+npx hardhat compile
+npx hardhat run
+```
+
+Consult the documentation on the local Docusaurus
+```bash
+# From the root of the repository
+cd my-website
+npm start
+# In your browser, go to localhost:3000
+```
 
 ### Maintenance and Contribution
 

@@ -32,11 +32,25 @@ euint8[2] encrypted_moves
 uint8 result
 ```
 
-### selectMode
+### constructor
 
 ```solidity
-function selectMode(bool input) external
+constructor() public
 ```
+
+### selectSinglePlayer
+
+```solidity
+function selectSinglePlayer(bool input) public
+```
+
+Allows single player mode
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| input | bool | Flag for single-player mode |
 
 ### joinGame
 
@@ -44,7 +58,7 @@ function selectMode(bool input) external
 function joinGame() public
 ```
 
-A game lobby allowing 2 players to join for a game of Rock-Paper-Scissors
+The game lobby for single or multi-player Rock-Paper-Scissors
 
 ### playGame
 
@@ -54,21 +68,13 @@ function playGame(externalEuint8 input, bytes proof) public
 
 Players submit their encrypted moves asynchronously along with its proof
 
-### endGame
+_there is no input checking on the smart contract. Must check validity of use input on the frontend!
+Only the owner, administrator of the game, may decrypt. Not the players._
 
-```solidity
-function endGame() public returns (uint8)
-```
+#### Parameters
 
-### requestDecryptPlayerMoves
-
-```solidity
-function requestDecryptPlayerMoves() external
-```
-
-### callbackDecryptMultipleValues
-
-```solidity
-function callbackDecryptMultipleValues(uint256 requestID, uint8 decryptPlayer1, uint8 decryptPlayer2, bytes[] signatures) external
-```
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| input | externalEuint8 | An external encrypted input of the player provided by the frontend |
+| proof | bytes | Corresponding proof of encryption |
 
