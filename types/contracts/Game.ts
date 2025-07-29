@@ -34,7 +34,6 @@ export interface GameInterface extends Interface {
       | "playGame"
       | "players"
       | "renounceOwnership"
-      | "result"
       | "selectSinglePlayer"
       | "transferOwnership"
   ): FunctionFragment;
@@ -67,7 +66,6 @@ export interface GameInterface extends Interface {
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "result", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "selectSinglePlayer",
     values: [boolean]
@@ -91,7 +89,6 @@ export interface GameInterface extends Interface {
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "result", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "selectSinglePlayer",
     data: BytesLike
@@ -178,8 +175,6 @@ export interface Game extends BaseContract {
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
-  result: TypedContractMethod<[], [bigint], "view">;
-
   selectSinglePlayer: TypedContractMethod<
     [input: boolean],
     [void],
@@ -224,9 +219,6 @@ export interface Game extends BaseContract {
   getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "result"
-  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "selectSinglePlayer"
   ): TypedContractMethod<[input: boolean], [void], "nonpayable">;

@@ -1,18 +1,18 @@
 # Rock-Paper-Scissors with Fully Homomorphic Encryption 
 
-### Table of Contents
-[Background](#background)
-[Environment Setup](#environment-setup)
-[Installation](#installation)
-[Testing and Deployment](#testing-and-deployment)
-[Maintenance and Contribution](#maintenance-and-contribution)
-[License](#license)
+## Table of Contents
+- [Background](#background)
+- [Environment Setup](#environment-setup)
+- [Installation](#installation)
+- [Testing and Deployment](#testing-and-deployment)
+- [Maintenance and Contribution](#maintenance-and-contribution)
+- [License](#license)
 
-### Background
+## Background
 
-### Environment Setup
+## Environment Setup
 
-### Project Quickstart
+## Project Quickstart
 
 Clone this repository
 ```bash
@@ -33,7 +33,7 @@ npm start
 # In your browser, go to localhost:3000
 ```
 
-### Maintenance and Contribution
+## Maintenance and Contribution
 
-### License
+## License
 This project is made available under the [MIT](https://github.com/CryptoDelirium/FHE-Game/blob/main/LICENSE) license.

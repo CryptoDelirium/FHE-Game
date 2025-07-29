@@ -6,11 +6,14 @@ sidebar_position: 1
 In order to run the tutorial, the following softwares are required:
 - [Nodejs](#nodejs) to compile and execute the project
 - [Hardhat](#hardhat) as the toolchain to compile and test the code
-- [Xcode](#xcode) as the IDE in which we write the code
+- [[Optional] VSCode](#optional-vscode) as the IDE in which we write the code
 
 ## Nodejs
 
->You must use an even numbered version of Nodejs
+:::danger[Nodejs version warning] 
+You must use an even numbered version of Nodejs
+:::
+
 
 ### Mac and Linux
 #### Installation via UI
@@ -41,68 +44,34 @@ nvm current # Should print "v22.17.1".
 npm -v # Should print "10.9.2".
 ```
 ### Windows
+:::tip[Using WSL]
+
+Hardhat may run slowly on WSL2. WSL1 is recommended for this project.
+
+:::
+
 Windows users are encouraged to install [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install) and then following the instructions in the [Mac and Linux](#mac-and-linux) section to complete the installation.
 
 ## Hardhat
-## Xcode
-
-Add **Markdown or React** files to `src/pages` to create a **standalone page**:
-
-- `src/pages/index.js` → `localhost:3000/`
-- `src/pages/foo.md` → `localhost:3000/foo`
-- `src/pages/foo/bar.js` → `localhost:3000/foo/bar`
-
-## Create your first React Page
-
-Create a file at `src/pages/my-react-page.js`:
-
-```jsx title="src/pages/my-react-page.js"
-import React from 'react';
-import Layout from '@theme/Layout';
-
-export default function MyReactPage() {
-  return (
-    <Layout>
-      <h1>My React page</h1>
-      <p>This is a React page</p>
-    </Layout>
-  );
-}
-```
-
-A new page is now available at [http://localhost:3000/my-react-page](http://localhost:3000/my-react-page).
-
-## Create your first Markdown Page
-
-Create a file at `src/pages/my-markdown-page.md`:
-
-```mdx title="src/pages/my-markdown-page.md"
-# My Markdown page
-
-This is a Markdown page
-```
-
-A new page is now available at [http://localhost:3000/my-markdown-page](http://localhost:3000/my-markdown-page).
-
-Get started by **creating a new site**.
-
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
-
-### What you'll need
-
-- [Node.js](https://nodejs.org/en/download/) version 18.0 or above:
-  - It is recommended to 
-
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
-
+Hardhat is provided directly through npm
+- Open the terminal.
+  - Windows users: Open powershell and start WSL.
+- Install hardhat through npm
 ```bash
-npm init docusaurus@latest my-website classic
+# Hardhat requires a minimum Node version of >=12.x and npm
+node -v
+npm -v
+
+# Install Hardhat
+npm i hardhat
 ```
+## [Optional] VSCode
+:::tip[Any text editor works!]
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+This step may be skipped if you have an IDE of choice but VSCode supports a number of useful Solidity plugins.
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+:::
+
+Download VSCode from its [official website](https://code.visualstudio.com/download).
+
+ # :rocket: You are all setup!

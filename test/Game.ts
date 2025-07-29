@@ -96,8 +96,8 @@ import hre from "hardhat";
     await tx4.wait();
 
     // Frontend requests the encrypted variables and requests decryption
-    const player1_einput = await Deployed_Game.connect(player1).encrypted_moves(0);
-    const player2_einput = await Deployed_Game.connect(player2).encrypted_moves(1);
+    const player1_einput = await Deployed_Game.connect(owner).encrypted_moves(0);
+    const player2_einput = await Deployed_Game.connect(owner).encrypted_moves(1);
 
     const player1_cleartext = await fhevm.userDecryptEuint(
       FhevmType.euint8, 
@@ -197,8 +197,8 @@ import hre from "hardhat";
       const tx3 = await Deployed_Game.connect(player1).playGame(encryptedInput0.handles[0], encryptedInput0.inputProof);
       await tx3.wait();
 // Frontend requests the encrypted variables and requests decryption
-    const player1_einput = await Deployed_Game.connect(player1).encrypted_moves(0);
-    const player2_einput = await Deployed_Game.connect(player2).encrypted_moves(1);
+    const player1_einput = await Deployed_Game.connect(owner).encrypted_moves(0);
+    const player2_einput = await Deployed_Game.connect(owner).encrypted_moves(1);
 
     const player1_cleartext = await fhevm.userDecryptEuint(
       FhevmType.euint8,

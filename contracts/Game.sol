@@ -13,7 +13,6 @@ contract Game is SepoliaConfig, Ownable{
     bool public hasPlayed1;
     bool public hasPlayed2;
     euint8[2] public encrypted_moves; //0 - rock; 1 - paper; 2 - scissors;
-    uint8 public result; //0 - draw; 1 - player 1 win, 2 - player 2 wins
 
     constructor() Ownable(msg.sender){}
 

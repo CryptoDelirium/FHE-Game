@@ -9,6 +9,7 @@ import type { HardhatUserConfig } from "hardhat/config";
 import { vars } from "hardhat/config";
 import "solidity-coverage";
 import 'solidity-docgen';
+import * as dotenv from "dotenv";
 
 // Run 'npx hardhat vars setup' to see the list of variables that need to be set
 

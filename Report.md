@@ -26,9 +26,9 @@ As an experience driven learner, I first looked at the provided Solidity tutoria
     ✅ Finally, I simply copied `hardhat.config.ts` and followed the versions on the tutorial `package.json` file.    
 
 ✅ Added in random number generation.
-    ❌ Uncertain why there is a limitation in the `FHEVMExecutor.sol` that the number must be a power of 2. Given how inputs are managed, this have to be handled in the frontend.
+    ❌ Uncertain why there is a limitation in the `FHEVMExecutor.sol` that the number must be a power of 2. Given how inputs are managed, this have to be handled in the frontend. Some incoherence in the documentation regarding the upper bound - version 0.7 does not have a page for the random number generation and version 0.6 seems to suggest any value is acceptable. 
 
-❌❌❌ Considering the point of decryption!!!
+❌❌❌ Consider the point of decryption!!!
     I had initially decrypted the inputs in the smart contracts. Only close to the deadline did I realise that cleartext can be read even in private variables given the transparent nature of blockchain then I had to debate which of the two routes to take:
 
     1. Work on the encrypted variables in the smart contract -> the way the smart contract is programmed, this would require many calls to the decryption oracle.
@@ -46,7 +46,7 @@ As an experience driven learner, I first looked at the provided Solidity tutoria
     - Video content or visual learners
     - Sandbox for experience learners
 ❌❌❌ Chose the documentation software platform
-    First started with Gitbook as the standard. Easy to use with UI editor. However, Gitbook crashed and the platform did not allow editing close to the submission deadline so changed to Docusaurus for its local deployment, md style editing.
+    First started with Gitbook as the standard. Easy to use with UI editor. However, Gitbook crashed and the platform did not allow editing close to the submission deadline so changed to Docusaurus for its local deployment and md style editing.
 
 ### Future Considerations
 There is always room for improvement in the code and documentation. Some possible TODOs:
@@ -56,6 +56,8 @@ There is always room for improvement in the code and documentation. Some possibl
 - Develop an additional Sepolia test suite for onchain simulation instead of only local hardhat testing.
 
 - Would have loved to implement a playground so new developers can directly interact with the smart contract and see the outputs without needing to install or run code.
+
+- Docusaurus has poor syntax highlighting for solidity. Contribute to the prismjs library for more robust highlighting.
 
 - Setup some developer tags in the github repo to entice open source contributions. For example, `Good-first-issue` for new entrants or a bounty program.
 
