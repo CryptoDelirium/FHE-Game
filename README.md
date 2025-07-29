@@ -53,7 +53,7 @@ git clone https://github.com/CryptoDelirium/FHE-Game.git
 Compile and run the test cases in Hardhat
 ```bash
 npx hardhat compile
-npx hardhat run
+npx hardhat test
 ```
 
 Consult the documentation on the local Docusaurus. Most of the content is found under the documentation tab.
